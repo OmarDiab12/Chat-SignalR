@@ -1,0 +1,69 @@
+﻿@model IEnumerable<SignalR.Models.Product>
+
+@{
+    ViewData["Title"] = "Index";
+    string? newProductName = TempData["NewProductName"] as string;
+
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<div id="NewProd" style="border:solid 5px red"></div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Quantity)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Quantity)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+    <script>
+        const hub = new signalR.HubConnectionBuilder().withUrl("/ProductHub").build();
+
+        hub.start().then(function () {
+            console.log("✅ SignalR connected");
+
+        @* Send from client after page is loaded *@
+            var newProduct = '@newProductName';
+            if (newProduct) {
+                hub.invoke("NotifyProductAdded", newProduct); // This goes to server hub
+            }
+        });
+
+        hub.on("AddNewProduct", function (name) {
+            console.log("📦 Received product:", name);
+            $("#NewProd").append(`<p>${name}</p>`);
+        });
+    </script>
+}
+
