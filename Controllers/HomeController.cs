@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SignalR.Models;
 
@@ -13,8 +14,10 @@ namespace SignalR.Controllers
             _logger = logger;
         }
 
+        [Authorize]
         public IActionResult ChatPage()
         {
+            ViewBag.UserName = User.Identity?.Name ?? string.Empty;
             return View("ChatPage");
         }
 
